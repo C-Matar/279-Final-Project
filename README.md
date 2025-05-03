@@ -6,4 +6,4 @@ The tar file can be extracted in the data folder.
 
 You can place the convert.py script in the data folder. The convert.py file just needs the filename and output name to be altered depending on which .h5 file you are interested in creating a .csv file for. 
 
-You can use makefile to create 'mlp_train'. Then to run (ex): 'mlp_train data/ani_s01.csv'
+You can use makefile to create 'mlp_train'. Then to run (ex): './mlp_train data/ani_s01.csv'

@@ -26,11 +26,12 @@ std::vector<GroupedConformer> load_grouped_csv(const std::string& filename) {
     while (std::getline(file, line)) {
         std::stringstream ss(line);
         std::string mol_id;
+        std::string formula;
         PairSample sample;
         char comma;
 
         std::getline(ss, mol_id, ',');
-        ss >> sample.z1 >> comma >> sample.z2 >> comma >> sample.distance >> comma >> sample.energy;
+        ss >> sample.z1 >> comma >> sample.z2 >> comma >> sample.distance >> comma >> sample.energy >> comma >> formula;
 
         conf_map[mol_id].pairs.push_back(sample);
         conf_map[mol_id].energy = sample.energy;

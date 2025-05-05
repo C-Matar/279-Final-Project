@@ -4,10 +4,7 @@
 #include <vector>
 #include <map>
 #include <cmath>
-#include <algorithm>
-#include <random>
 #include <set>
-#include <string>
 #include <iomanip>
 #include "MLP.h"
 
@@ -19,12 +16,10 @@ struct GroupedConformer {
 std::vector<GroupedConformer> load_grouped_csv(const std::string& filename) {
     std::vector<GroupedConformer> conformers;
     std::ifstream file(filename);
-    if (!file.is_open()) {
-        throw std::runtime_error("Cannot open file: " + filename);
-    }
+    if (!file.is_open()) throw std::runtime_error("Cannot open file: " + filename);
 
     std::string line;
-    std::getline(file, line); // skips header
+    std::getline(file, line); // skip header
 
     std::map<std::string, GroupedConformer> conf_map;
 
@@ -71,13 +66,11 @@ int main(int argc, char* argv[]) {
     std::string csv_file = argv[1];
     auto conformers = load_grouped_csv(csv_file);
 
+    // Build atom-type list and index map
     std::set<int> atom_numbers;
-    for (const auto& mol : conformers) {
-        for (const auto& p : mol.pairs) {
-            atom_numbers.insert(p.z1);
-            atom_numbers.insert(p.z2);
-        }
-    }
+    for (const auto& mol : conformers)
+        for (const auto& p : mol.pairs)
+            atom_numbers.insert(p.z1), atom_numbers.insert(p.z2);
 
     std::vector<int> z_list(atom_numbers.begin(), atom_numbers.end());
     std::map<int, int> z_to_idx;
@@ -87,61 +80,19 @@ int main(int argc, char* argv[]) {
     int num_atom_types = z_list.size();
     int input_dim = 2 * num_atom_types + 1;
     std::vector<int> hidden_layers = {256, 128, 64};
-    MLP nn(input_dim, hidden_layers, 1, 0.0001);
 
+    MLP nn(input_dim, hidden_layers, 1, 0.0001);
+    nn.load_weights("trained_model.txt");
+    std::cout << "Loaded weights from trained_model.txt\n";
+
+    // Normalize distance
     std::vector<double> distances;
     for (const auto& mol : conformers)
         for (const auto& p : mol.pairs)
             distances.push_back(p.distance);
     auto [mean_d, std_d] = calculate_mean_stddev(distances);
 
-    int epochs = 500;
-    std::mt19937 rng(42);
-    for (int epoch = 0; epoch < epochs; ++epoch) {
-        std::shuffle(conformers.begin(), conformers.end(), rng);
-        double total_loss = 0.0;
-
-        for (const auto& mol : conformers) {
-            std::vector<Vector> inputs;
-            for (const auto& p : mol.pairs) {
-                int i1 = z_to_idx[p.z1];
-                int i2 = z_to_idx[p.z2];
-                double norm_d = normalize_value(p.distance, mean_d, std_d);
-                inputs.push_back(nn.encode_input(i1, i2, norm_d, num_atom_types));
-            }
-
-            double pred_energy = 0.0;
-            for (const auto& input : inputs)
-                pred_energy += nn.predict_pair_energy(input);
-
-            double loss = 0.5 * std::pow(pred_energy - mol.energy, 2);
-            total_loss += loss;
-
-            double grad = (pred_energy - mol.energy) / mol.pairs.size();
-
-            std::vector<Matrix> dw(nn.get_layer_sizes().size() - 1);
-            std::vector<Vector> db(nn.get_layer_sizes().size() - 1);
-            for (size_t i = 0; i < dw.size(); ++i)
-                dw[i] = Matrix(nn.get_layer_sizes()[i + 1], Vector(nn.get_layer_sizes()[i], 0.0));
-            for (size_t i = 0; i < db.size(); ++i)
-                db[i] = Vector(nn.get_layer_sizes()[i + 1], 0.0);
-
-            for (const auto& input : inputs) {
-                nn.forward_pair(input);
-                nn.backward_pair(input, grad, dw, db);
-            }
-
-            nn.apply_gradients(dw, db);
-        }
-
-        if ((epoch + 1) % 50 == 0)
-            std::cout << "Epoch " << epoch + 1 << ", Avg Loss: " << total_loss / conformers.size() << "\n";
-    }
-
-    nn.save_weights("trained_model.txt");
-    std::cout << "Model weights saved to trained_model.txt\n";
-
-
+    // Predicts and saves
     std::ofstream out("predictions.csv");
     out << "molecule_id,true_energy,predicted_energy,error\n";
 
@@ -164,7 +115,6 @@ int main(int argc, char* argv[]) {
             << "," << mol.energy << "," << pred_energy << "," << err << "\n";
     }
 
-    std::cout << "Wrote prediction results to predictions.csv\n";
-
+    std::cout << "Saved predictions to predictions.csv\n";
     return 0;
 }

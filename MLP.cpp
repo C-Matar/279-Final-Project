@@ -2,6 +2,7 @@
 #include <random>
 #include <iostream>
 #include <cassert>
+#include <fstream>
 
 MLP::MLP(int input_dim, const std::vector<int>& hidden_layers, int output_dim, double lr) {
     learning_rate = lr;
@@ -109,4 +110,47 @@ double MLP::relu(double x) {
 
 double MLP::relu_deriv(double x) {
     return x > 0.0 ? 1.0 : 0.0;
+}
+
+void MLP::save_weights(const std::string& filename) const {
+    std::ofstream out(filename);
+    if (!out.is_open()) throw std::runtime_error("Cannot open file to save weights");
+
+    for (size_t l = 0; l < weights.size(); ++l) {
+        // Save weights
+        for (const auto& row : weights[l]) {
+            for (double w : row)
+                out << w << " ";
+            out << "\n";
+        }
+        out << "#\n";
+
+        for (double b : biases[l])
+            out << b << " ";
+        out << "\n#\n";
+    }
+}
+
+void MLP::load_weights(const std::string& filename) {
+    std::ifstream in(filename);
+    if (!in.is_open()) throw std::runtime_error("Cannot open file to load weights");
+
+    for (size_t l = 0; l < weights.size(); ++l) {
+        // Load weights
+        for (auto& row : weights[l]) {
+            for (double& w : row)
+                in >> w;
+        }
+
+        std::string separator;
+        std::getline(in, separator); // newline
+        std::getline(in, separator); // "#"
+
+        // Load biases
+        for (double& b : biases[l])
+            in >> b;
+
+        std::getline(in, separator); // newline
+        std::getline(in, separator); // "#"
+    }
 }

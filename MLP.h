@@ -23,6 +23,9 @@ public:
     void forward_pair(const Vector& input);
     void backward_pair(const Vector& input, double grad, std::vector<Matrix>& dw, std::vector<Vector>& db);
     void apply_gradients(const std::vector<Matrix>& dw, const std::vector<Vector>& db);
+    void save_weights(const std::string& filename) const;
+    void load_weights(const std::string& filename);
+
 
     const std::vector<int>& get_layer_sizes() const;
 

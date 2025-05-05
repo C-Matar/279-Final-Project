@@ -1,15 +1,24 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -O2 -Wall
 
-TARGET = mlp_train
-SRCS = main.cpp MLP.cpp
-OBJS = $(SRCS:.cpp=.o)
+TRAIN_TARGET = mlp_train
+TRAIN_SRCS = main.cpp MLP.cpp
+TRAIN_OBJS = $(TRAIN_SRCS:.cpp=.o)
 
-$(TARGET): $(OBJS)
-	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS)
+PREDICT_TARGET = mlp_predict
+PREDICT_SRCS = main_predict.cpp MLP.cpp
+PREDICT_OBJS = $(PREDICT_SRCS:.cpp=.o)
+
+all: $(TRAIN_TARGET) $(PREDICT_TARGET)
+
+$(TRAIN_TARGET): $(TRAIN_OBJS)
+	$(CXX) $(CXXFLAGS) -o $(TRAIN_TARGET) $(TRAIN_OBJS)
+
+$(PREDICT_TARGET): $(PREDICT_OBJS)
+	$(CXX) $(CXXFLAGS) -o $(PREDICT_TARGET) $(PREDICT_OBJS)
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f $(TRAIN_OBJS) $(PREDICT_OBJS) $(TRAIN_TARGET) $(PREDICT_TARGET)

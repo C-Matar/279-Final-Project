@@ -96,7 +96,15 @@ int main(int argc, char* argv[]) {
             distances.push_back(p.distance);
     auto [mean_d, std_d] = calculate_mean_stddev(distances);
 
-    int epochs = 500;
+    
+    auto [min_it, max_it] = std::minmax_element(distances.begin(), distances.end());
+    double min_d = *min_it;
+    double max_d = *max_it;
+    std::cout<< "Mean distance: " << mean_d << ", Stddev: " << std_d << "\n";
+    std::cout << "Min distance: " << min_d << ", Max distance: " << max_d << "\n";
+
+
+    int epochs = 1000;
     std::mt19937 rng(42);
     for (int epoch = 0; epoch < epochs; ++epoch) {
         std::shuffle(conformers.begin(), conformers.end(), rng);
@@ -135,7 +143,7 @@ int main(int argc, char* argv[]) {
             nn.apply_gradients(dw, db);
         }
 
-        if ((epoch + 1) % 1 == 0)
+        if ((epoch + 1) % 5 == 0)
             std::cout << "Epoch " << epoch + 1 << ", Avg Loss: " << total_loss / conformers.size() << "\n";
     }
 

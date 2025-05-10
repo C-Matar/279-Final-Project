@@ -44,16 +44,6 @@ std::vector<GroupedConformer> load_grouped_csv(const std::string& filename) {
     return conformers;
 }
 
-std::pair<double, double> calculate_mean_stddev(const std::vector<double>& values) {
-    double sum = 0.0;
-    for (double v : values) sum += v;
-    double mean = sum / values.size();
-    double sq_sum = 0.0;
-    for (double v : values) sq_sum += (v - mean) * (v - mean);
-    double stddev = std::sqrt(sq_sum / values.size());
-    return {mean, stddev};
-}
-
 double normalize_value(double x, double mean, double stddev) {
     return stddev > 1e-6 ? (x - mean) / stddev : x;
 }
@@ -83,15 +73,11 @@ int main(int argc, char* argv[]) {
     std::vector<int> hidden_layers = {256, 128, 64};
 
     MLP nn(input_dim, hidden_layers, 1, 0.0001);
-    nn.load_weights("trained_model.txt");
+    nn.load_weights("trained_model_1000_256.txt");
     std::cout << "Loaded weights from trained_model.txt\n";
 
-    // Normalize distance
-    std::vector<double> distances;
-    for (const auto& mol : conformers)
-        for (const auto& p : mol.pairs)
-            distances.push_back(p.distance);
-    auto [mean_d, std_d] = calculate_mean_stddev(distances);
+    double mean_d = 2.34664;
+    double std_d = 0.934951;
 
     // Predicts and saves
     std::ofstream out("predictions.csv");

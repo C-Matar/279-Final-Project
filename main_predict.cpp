@@ -19,7 +19,7 @@ std::vector<GroupedConformer> load_grouped_csv(const std::string& filename) {
     if (!file.is_open()) throw std::runtime_error("Cannot open file: " + filename);
 
     std::string line;
-    std::getline(file, line); // skip header
+    std::getline(file, line);
 
     std::map<std::string, GroupedConformer> conf_map;
 
@@ -49,15 +49,15 @@ double normalize_value(double x, double mean, double stddev) {
 }
 
 int main(int argc, char* argv[]) {
-    if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " ani_pairs_with_ids.csv\n";
+    if (argc < 3) {
+        std::cerr << "Usage: " << argv[0] << " test.csv weights.txt\n";
         return 1;
     }
 
     std::string csv_file = argv[1];
+    std::string weights_file = argv[2];
     auto conformers = load_grouped_csv(csv_file);
 
-    // Build atom-type list and index map
     std::set<int> atom_numbers;
     for (const auto& mol : conformers)
         for (const auto& p : mol.pairs)
@@ -73,14 +73,13 @@ int main(int argc, char* argv[]) {
     std::vector<int> hidden_layers = {256, 128, 64};
 
     MLP nn(input_dim, hidden_layers, 1, 0.0001);
-    nn.load_weights("trained_model/trained_model_1000_256.txt");
-    std::cout << "Loaded weights from trained_model.txt\n";
+    nn.load_weights(weights_file);
+    std::cout << "Loaded weights from " << weights_file << "\n";
 
     double mean_d = 2.34664;
     double std_d = 0.934951;
 
-    // Predicts and saves
-    std::ofstream out("predictions_test.csv");
+    std::ofstream out("predictions.csv");
     out << "molecule_id,true_energy,predicted_energy,error\n";
 
     int mol_idx = 0;
@@ -102,6 +101,6 @@ int main(int argc, char* argv[]) {
             << "," << mol.energy << "," << pred_energy << "," << err << "\n";
     }
 
-    std::cout << "Saved predictions to predictions_test.csv\n";
+    std::cout << "Saved predictions to predictions.csv\n";
     return 0;
 }

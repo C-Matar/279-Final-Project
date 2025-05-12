@@ -1,42 +1,50 @@
-CXX       := g++
-CXXFLAGS  := -std=c++17 -O2 -Wall
+CXX := g++
+CXXFLAGS := -std=c++17 -O2 -Wall
 
-TRAIN_TARGET   := mlp_train
-TRAIN_SRCS     := main.cpp MLP.cpp
-TRAIN_OBJS     := $(TRAIN_SRCS:.cpp=.o)
+TRAIN_BIN := mlp_train
+PREDICT_BIN := mlp_predict
 
-PREDICT_TARGET := mlp_predict
-PREDICT_SRCS   := main_predict.cpp MLP.cpp
-PREDICT_OBJS   := $(PREDICT_SRCS:.cpp=.o)
+MLP_SRC := MLP.cpp
+MLP_HDR := MLP.h
 
-# CSV files 
-TRAIN_CSV      := data/ani_s01-4_sampled_100_train.csv
-TEST_CSV       := data/ani_s01-4_sampled_100_test.csv
+TRAIN_SRC := main.cpp $(MLP_SRC)
+PREDICT_SRC := main_predict.cpp $(MLP_SRC)
 
-.PHONY: all train test clean
+WEIGHTS := trained_model/trained_model_1000_256.txt
 
-all: $(TRAIN_TARGET) $(PREDICT_TARGET)
+all: $(TRAIN_BIN) $(PREDICT_BIN)
 
-# build binaries
-$(TRAIN_TARGET): $(TRAIN_OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $^
+$(TRAIN_BIN): $(TRAIN_SRC) $(MLP_HDR)
+	$(CXX) $(CXXFLAGS) -o $@ $(TRAIN_SRC)
 
-$(PREDICT_TARGET): $(PREDICT_OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $^
+$(PREDICT_BIN): $(PREDICT_SRC) $(MLP_HDR)
+	$(CXX) $(CXXFLAGS) -o $@ $(PREDICT_SRC)
 
-# compile .o files
-%.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+train: $(TRAIN_BIN)
+	./$(TRAIN_BIN) data/ani_s01-4_sampled_100_train.csv
 
-# run training
-train: $(TRAIN_TARGET)
-	@echo "→ Running training on $(TRAIN_CSV)"
-	./$(TRAIN_TARGET) $(TRAIN_CSV)
-
-# run test
-test: $(PREDICT_TARGET)
-	@echo "→ Running prediction on $(TEST_CSV)"
-	./$(PREDICT_TARGET) $(TEST_CSV)
+predict: $(PREDICT_BIN)
+	./$(PREDICT_BIN) data/ani_s01-4_sampled_100_test.csv $(WEIGHTS)
 
 clean:
-	rm -f $(TRAIN_OBJS) $(PREDICT_OBJS) $(TRAIN_TARGET) $(PREDICT_TARGET)
+	rm -f *.o $(TRAIN_BIN) $(PREDICT_BIN) predictions.csv trained_model.txt predictions_test.csv predictions_train.csv mlp_energy_predictor 
+
+.PHONY: all train predict clean
+
+docker-train:
+	@docker run --rm -it \
+		-v "$$PWD/data":/app/data \
+		-v "$$PWD/trained_model":/app/trained_model \
+		-v "$$PWD":/app/output \
+		-w /app \
+		mlp-energy \
+		bash -c "./mlp_train data/ani_s01-4_sampled_100_train.csv && cp predictions_train.csv /app/output/"
+
+docker-test:
+	@docker run --rm -it \
+		-v "$$PWD/data":/app/data \
+		-v "$$PWD/trained_model":/app/trained_model \
+		-v "$$PWD":/app/output \
+		-w /app \
+		mlp-energy \
+		bash -c "./mlp_predict data/ani_s01-4_sampled_100_test.csv trained_model/trained_model_1000_256.txt && cp predictions.csv /app/output/"

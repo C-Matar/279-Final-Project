@@ -8,14 +8,14 @@ RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
     libhdf5-dev \
-    && rm -rf /var/lib/apt/lists/*
+ && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
 COPY . .
 
-# For convert.py
-RUN pip3 install numpy h5py
+RUN pip3 install numpy h5py matplotlib
 
-# build C++ binaries through Makefile
-RUN make
+RUN make clean && make
+
+CMD ["bash"]

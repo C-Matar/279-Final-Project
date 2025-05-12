@@ -28,25 +28,21 @@ make clean
 
 ## Docker Build and Run
 
+Clean:
+```
+make clean
+```
 Build Image:
 ```
 docker build -t mlp-energy-predictor .
 ```
 Train in Docker:
 ```
-docker run --rm -it \
-  -v "$PWD/data":/app/data \
-  -v "$PWD/trained_model":/app/trained_model \
-  mlp-energy-predictor \
-  make train
+make docker-train
 ```
 Test in Docker:
 ```
-docker run --rm -it \
-  -v "$PWD/data":/app/data \
-  -v "$PWD/trained_model":/app/trained_model \
-  mlp-energy-predictor \
-  make test
+make docker-test
 ```
 
 ## File Overview:

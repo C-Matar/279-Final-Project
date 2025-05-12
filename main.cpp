@@ -103,7 +103,6 @@ int main(int argc, char* argv[]) {
     std::cout<< "Mean distance: " << mean_d << ", Stddev: " << std_d << "\n";
     std::cout << "Min distance: " << min_d << ", Max distance: " << max_d << "\n";
 
-
     int epochs = 1000;
     std::mt19937 rng(42);
     for (int epoch = 0; epoch < epochs; ++epoch) {
@@ -147,8 +146,8 @@ int main(int argc, char* argv[]) {
             std::cout << "Epoch " << epoch + 1 << ", Avg Loss: " << total_loss / conformers.size() << "\n";
     }
 
-    nn.save_weights("trained_model_1000_256.txt");
-    std::cout << "Model weights saved to trained_model.txt\n";
+    nn.save_weights("trained_model/trained_model_1000_256.txt");
+    std::cout << "Model weights saved to trained_model/trained_model_1000_256.txt\n";
 
 
     std::ofstream out("predictions_train.csv");

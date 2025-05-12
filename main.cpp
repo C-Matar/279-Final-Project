@@ -147,11 +147,11 @@ int main(int argc, char* argv[]) {
             std::cout << "Epoch " << epoch + 1 << ", Avg Loss: " << total_loss / conformers.size() << "\n";
     }
 
-    nn.save_weights("trained_model.txt");
+    nn.save_weights("trained_model_1000_256.txt");
     std::cout << "Model weights saved to trained_model.txt\n";
 
 
-    std::ofstream out("predictions.csv");
+    std::ofstream out("predictions_train.csv");
     out << "molecule_id,true_energy,predicted_energy,error\n";
 
     int mol_idx = 0;
@@ -173,7 +173,7 @@ int main(int argc, char* argv[]) {
             << "," << mol.energy << "," << pred_energy << "," << err << "\n";
     }
 
-    std::cout << "Wrote prediction results to predictions.csv\n";
+    std::cout << "Wrote prediction results to predictions_train.csv\n";
 
     return 0;
 }

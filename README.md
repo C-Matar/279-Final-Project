@@ -1,70 +1,32 @@
 # Machine Learned Conformer Energy Prediction via Approximating Pairwise Potential
 
-## Running
-To compile:
+## Local Build and Run
+**To compile:**
 ```
 make
 ```
-To train the model:
+**To train the model:**
 ```
 ./mlp_train data/ani_s01-4_sampled_100_train.csv
 ```
-To run inference using trained model (Note: weights loading filename is hardcoded and needs changing):
-```
-./mlp_predict data/ani_s01-4_sampled_100_test.csv
-```
-
-## Update -----------------------------------------
-
-### File Overview:
-
-**`data`** : Contains generated CSVs needed to replicate our model training and testing
-
-**`Figs`** : Holds figures and plots
-
-**`trained_model/`**: Storage for `mlp_train` weights
-
-**`convert.py`**: Convert ANI-1 HDF5 to a pairwise CSV file
-
-**`main_predict.cpp`** : Builds MLP architecture, loads saved weights from the trained model, runs forward passes to predict energy, outputs predictions.csv
-
-**`main.cpp`** : Loads CSV, calculates normalization, trains MLP, saveds weights, outputs predictions.csv for training
-
-**`MLP.cpp`** : MLP class implemented
-
-**`MLP.h`** : PairSample Struct and MLP class layout
-
-
-
-### Needed to Run:
-- g++
-- Make
-- python3
-- python3-pip
-- libhdf5-dev
-
-### Can also use Dockerfile to run
-
-### Local Build and Run
-
-Build C++ Binary Files (mlp_train and mlp_predict):
-```
-make
-```
-Train using Train CSV File under Data Folder:
+or optionally:
 ```
 make train
 ```
-Test on Test CSV under Data Folder:
+**To run inference using trained model:**
+```
+./mlp_predict data/ani_s01-4_sampled_100_test.csv
+```
+or optionally:
 ```
 make test
 ```
-Clean:
+**Clean:**
 ```
 make clean
 ```
 
-### Docker Build and Run
+## Docker Build and Run
 
 Build Image:
 ```
@@ -86,3 +48,30 @@ docker run --rm -it \
   mlp-energy-predictor \
   make test
 ```
+
+## File Overview:
+
+**`data/`** : Contains training and testing data CSVs needed to replicate our model training and testing
+
+**`Figs/`** : Holds figures and plots.
+
+**`trained_model/`**: Holds trained model weights.
+
+**`plotting/`**: Contains predictions on the test set using the `trained_model/trained_model_1000_256.txt`, and other plotting functionalities.
+
+**`convert.py`**: Reads an ANI-1 HDF5 file, extracts pairwise informations and write them to a CSV file.
+
+**`main_predict.cpp`** : Loads saved weights from the trained model, runs inference on the test set, and outputs `predictions_test.csv`.
+
+**`main.cpp`** : Loads training data CSV, trains MLP, saves weights, and outputs `predictions_train.csv`.
+
+**`MLP.cpp`** : MLP class implementation.
+
+**`MLP.h`** : PairSample Struct and MLP class layout
+
+### Needed to Run:
+- g++
+- Make
+- python3
+- python3-pip
+- libhdf5-dev

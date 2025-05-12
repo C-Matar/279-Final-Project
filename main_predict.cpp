@@ -73,14 +73,14 @@ int main(int argc, char* argv[]) {
     std::vector<int> hidden_layers = {256, 128, 64};
 
     MLP nn(input_dim, hidden_layers, 1, 0.0001);
-    nn.load_weights("trained_model_1000_256.txt");
+    nn.load_weights("trained_model/trained_model_1000_256.txt");
     std::cout << "Loaded weights from trained_model.txt\n";
 
     double mean_d = 2.34664;
     double std_d = 0.934951;
 
     // Predicts and saves
-    std::ofstream out("predictions.csv");
+    std::ofstream out("predictions_test.csv");
     out << "molecule_id,true_energy,predicted_energy,error\n";
 
     int mol_idx = 0;
@@ -102,6 +102,6 @@ int main(int argc, char* argv[]) {
             << "," << mol.energy << "," << pred_energy << "," << err << "\n";
     }
 
-    std::cout << "Saved predictions to predictions.csv\n";
+    std::cout << "Saved predictions to predictions_test.csv\n";
     return 0;
 }

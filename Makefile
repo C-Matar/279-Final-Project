@@ -37,7 +37,7 @@ docker-train:
 		-v "$$PWD/trained_model":/app/trained_model \
 		-v "$$PWD":/app/output \
 		-w /app \
-		mlp-energy \
+		mlp-energy-predictor \
 		bash -c "./mlp_train data/ani_s01-4_sampled_100_train.csv && cp predictions_train.csv /app/output/"
 
 docker-test:
@@ -46,5 +46,5 @@ docker-test:
 		-v "$$PWD/trained_model":/app/trained_model \
 		-v "$$PWD":/app/output \
 		-w /app \
-		mlp-energy \
+		mlp-energy-predictor \
 		bash -c "./mlp_predict data/ani_s01-4_sampled_100_test.csv trained_model/trained_model_1000_256.txt && cp predictions.csv /app/output/"
